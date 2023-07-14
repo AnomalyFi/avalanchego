@@ -32,6 +32,9 @@ type trieHistory struct {
 	history *btree.BTreeG[*changeSummaryAndIndex]
 
 	nextIndex uint64
+
+	//This determines whether we will ever prune the state
+	archive bool
 }
 
 // Tracks the beginning and ending state of a value.
@@ -63,7 +66,7 @@ func newChangeSummary(estimatedSize int) *changeSummary {
 	}
 }
 
-func newTrieHistory(maxHistoryLookback int) *trieHistory {
+func newTrieHistory(maxHistoryLookback int, archiveEnabled bool) *trieHistory {
 	return &trieHistory{
 		maxHistoryLen: maxHistoryLookback,
 		history: btree.NewG(
@@ -73,6 +76,7 @@ func newTrieHistory(maxHistoryLookback int) *trieHistory {
 			},
 		),
 		lastChanges: make(map[ids.ID]*changeSummaryAndIndex),
+		archive: archiveEnabled,
 	}
 }
 
@@ -251,7 +255,7 @@ func (th *trieHistory) record(changes *changeSummary) {
 		return
 	}
 
-	for th.history.Len() == th.maxHistoryLen {
+	for (th.history.Len() == th.maxHistoryLen) && !th.archive {
 		// This change causes us to go over our lookback limit.
 		// Remove the oldest set of changes.
 		oldestEntry, _ := th.history.DeleteMin()

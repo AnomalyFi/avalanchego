@@ -162,6 +162,8 @@ type merkleDB struct {
 
 	metrics merkleMetrics
 
+	archive bool
+
 	tracer trace.Tracer
 
 	// The root of this trie.
@@ -181,7 +183,8 @@ func newDatabase(
 		metrics:           metrics,
 		nodeDB:            prefixdb.New(nodePrefix, db),
 		metadataDB:        prefixdb.New(metadataPrefix, db),
-		history:           newTrieHistory(config.HistoryLength),
+		history:           newTrieHistory(config.HistoryLength, config.ArchiveEnabled),
+		archive:           config.ArchiveEnabled
 		tracer:            config.Tracer,
 		childViews:        make([]*trieView, 0, defaultPreallocationSize),
 		evictionBatchSize: config.EvictionBatchSize,
