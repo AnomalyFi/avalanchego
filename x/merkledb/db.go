@@ -117,6 +117,7 @@ type MerkleDB interface {
 }
 
 type Config struct {
+	ArchiveEnabled bool
 	// The number of nodes that are evicted from the cache and written to
 	// disk at a time.
 	EvictionBatchSize int
