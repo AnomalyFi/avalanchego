@@ -20,15 +20,23 @@ type Sortable[T any] interface {
 
 // Sorts the elements of [s].
 func Sort[T Sortable[T]](s []T) {
-	slices.SortFunc(s, T.Less)
+	f := func(a, b T) int {
+		if T.Less(a, b) {
+			return -1
+		} else {
+			return 1
+		}
+	}
+
+	slices.SortFunc(s, f)
 }
 
 // Sorts the elements of [s] based on their hashes.
 func SortByHash[T ~[]byte](s []T) {
-	slices.SortFunc(s, func(i, j T) bool {
+	slices.SortFunc(s, func(i, j T) int {
 		iHash := hashing.ComputeHash256(i)
 		jHash := hashing.ComputeHash256(j)
-		return bytes.Compare(iHash, jHash) == -1
+		return bytes.Compare(iHash, jHash)
 	})
 }
 
@@ -36,8 +44,8 @@ func SortByHash[T ~[]byte](s []T) {
 // Each byte slice is not sorted internally; the byte slices are sorted relative
 // to one another.
 func SortBytes[T ~[]byte](s []T) {
-	slices.SortFunc(s, func(i, j T) bool {
-		return bytes.Compare(i, j) == -1
+	slices.SortFunc(s, func(i, j T) int {
+		return bytes.Compare(i, j)
 	})
 }
 

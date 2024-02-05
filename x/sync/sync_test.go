@@ -691,8 +691,25 @@ func TestFindNextKeyRandom(t *testing.T) {
 				(bytes.Equal(i.key.Value, j.key.Value) &&
 					i.key.NibbleLength < j.key.NibbleLength)
 		}
-		slices.SortFunc(remoteKeyIDs, serializedPathLess)
-		slices.SortFunc(localKeyIDs, serializedPathLess)
+
+		serializedPathCmp := func(i, j keyAndID) int {
+			if bytes.Compare(i.key.Value, j.key.Value) < 0 {
+				return -1
+			} else if bytes.Compare(i.key.Value, j.key.Value) > 0 {
+				return 1
+			} else {
+				if i.key.NibbleLength < j.key.NibbleLength {
+					return -1
+				} else if i.key.NibbleLength > j.key.NibbleLength {
+					return 1
+				} else {
+					return 0
+				}
+			}
+		}
+
+		slices.SortFunc(remoteKeyIDs, serializedPathCmp)
+		slices.SortFunc(localKeyIDs, serializedPathCmp)
 
 		// Filter out keys that are before the last received key
 		findBounds := func(keyIDs []keyAndID) (int, int) {
@@ -1179,8 +1196,8 @@ func generateTrieWithMinKeyLen(t *testing.T, r *rand.Rand, count int, minKeyLen 
 		}
 		i++
 	}
-	slices.SortFunc(allKeys, func(a, b []byte) bool {
-		return bytes.Compare(a, b) < 0
+	slices.SortFunc(allKeys, func(a, b []byte) int {
+		return bytes.Compare(a, b)
 	})
 	return db, allKeys, batch.Write()
 }
