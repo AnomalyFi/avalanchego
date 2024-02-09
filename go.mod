@@ -150,4 +150,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/ava-labs/coreth => ../coreth
+replace github.com/ava-labs/coreth => github.com/bianyuanop/coreth v0.12.5-rc.6.1
